@@ -2,34 +2,32 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const aiService = {
-  getAI() {
-    // 动态获取 API_KEY，防止模块加载时 ReferenceError
-    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
-    return new GoogleGenAI({ apiKey: apiKey || '' });
-  },
-
   async analyzeCottonHealth(nitrogen: number, status: string, stressors: string[]): Promise<string> {
     try {
-      const ai = this.getAI();
-      const prompt = `你是一位中国棉花精准管理专家。请根据以下数据提供农事建议：
-      - 监测氮含量：${nitrogen} mg/g
-      - 本地诊断状态：${status}
-      - 潜在压力：${stressors.join(', ')}
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+      const prompt = `[棉花叶片氮素监测平台 - 智能决策请求]
+      监测数据摘要：
+      - 氮素水平：${nitrogen} mg/g
+      - 边缘诊断状态：${status}
+      - 生理性压力点：${stressors.join(', ')}
       
-      请提供约 150 字的专业建议，包括追肥调控和病虫害预防建议，语气要专业且务实，符合中国棉农的生产习惯。`;
+      请依据棉花栽培生理学与植物营养学规范，给出专家建议：
+      1. 精准肥水调控方案（含推荐肥种）；
+      2. 针对性长势补强措施；
+      3. 短期生理健康趋势预测。
+      回复要求：学术专业，分点陈述，200字以内。`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
         config: {
-          systemInstruction: "你是由先进科技驱动的中国棉花科研专家系统。你精通光谱诊断、水肥一体化和棉花生理学。你的目标是帮助用户最大化产量并优化肥料投入。"
+          systemInstruction: "你是由先进遥感多光谱分析驱动的“棉花叶片氮素监测平台”核心专家引擎。你的回答应基于严谨的农艺学逻辑，客观、权威且具备实操价值。"
         }
       });
 
-      return response.text || "AI 专家暂时无法生成报告。";
+      return response.text || "云端分析暂时不可用。";
     } catch (error) {
-      console.error("AI Analysis Error:", error);
-      return "智能分析系统连接异常，请参考本地诊断意见。";
+      return "专家引擎响应异常。";
     }
   }
 };

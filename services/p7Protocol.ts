@@ -1,5 +1,5 @@
 
-import { P7_MAGIC, P7_FCS } from '../constants.tsx';
+import { P7_MAGIC } from '../constants.tsx';
 import { MessageId } from '../types.ts';
 
 export class P7Protocol {
@@ -17,16 +17,12 @@ export class P7Protocol {
 
     packet[0] = P7_MAGIC[0];
     packet[1] = P7_MAGIC[1];
-    
     packet[2] = payloadLen & 0xFF;
     packet[3] = (payloadLen >> 8) & 0xFF;
-    
     packet[4] = 0xFF; 
     packet[5] = 0xFF;
-    
     packet[6] = 0x01;
     packet[7] = 0xA0;
-    
     packet[8] = msgId;
 
     for (let i = 0; i < payloadLen; i++) {
@@ -35,7 +31,6 @@ export class P7Protocol {
 
     const checksumIndex = 9 + payloadLen;
     packet[checksumIndex] = this.calculateChecksum(packet, checksumIndex);
-
     packet[checksumIndex + 1] = 0x00;
     packet[checksumIndex + 2] = 0x00;
 
@@ -53,9 +48,7 @@ export class P7Protocol {
 
     const checksumIndex = 9 + payloadLen;
     const calculated = this.calculateChecksum(data, checksumIndex);
-    if (data[checksumIndex] !== calculated) {
-      return null;
-    }
+    if (data[checksumIndex] !== calculated) return null;
 
     return {
       msgId: data[8],

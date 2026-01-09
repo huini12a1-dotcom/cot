@@ -11,7 +11,6 @@ export class BluetoothService {
   private receiveBuffer: Uint8Array = new Uint8Array(0);
   
   private readonly HANDSHAKE_KEY = "LJ73BHGSTF23GD65";
-
   private readonly SERVICE_UUIDS = [
     '0000ffe0-0000-1000-8000-00805f9b34fb',
     '0000ff01-0000-1000-8000-00805f9b34fb',
@@ -36,7 +35,7 @@ export class BluetoothService {
         }
       }
 
-      if (!this.txCharacteristic || !this.rxCharacteristic) throw new Error('找不到通信通道');
+      if (!this.txCharacteristic || !this.rxCharacteristic) throw new Error('Channel error');
 
       await this.rxCharacteristic.startNotifications();
       this.rxCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
@@ -44,10 +43,9 @@ export class BluetoothService {
       });
 
       this.device.addEventListener('gattserverdisconnected', () => this.disconnect());
-
       await this.performHandshake();
 
-      return this.device.name || 'P7 Spectrometer';
+      return this.device.name || 'CP-P7-Node';
     } catch (error: any) {
       this.disconnect();
       throw error;
@@ -57,16 +55,16 @@ export class BluetoothService {
   private async performHandshake(): Promise<void> {
     const keyBytes = new TextEncoder().encode(this.HANDSHAKE_KEY);
     return new Promise(async (resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('握手响应超时')), 5000);
-      
+      const timeout = setTimeout(() => reject(new Error('Handshake timeout')), 5000);
       const originalCallback = this.onDataCallback;
+      
       this.onDataCallback = (data: Uint8Array) => {
         const parsed = P7Protocol.parsePacket(data);
         if (parsed && parsed.msgId === MessageId.HANDSHAKE) {
           clearTimeout(timeout);
           this.onDataCallback = originalCallback;
           if (parsed.payload[0] === 0x01) resolve();
-          else reject(new Error('密钥校验失败'));
+          else reject(new Error('Auth failed'));
         }
       };
 
@@ -108,7 +106,7 @@ export class BluetoothService {
   }
 
   async sendPacket(msgId: MessageId, payload: Uint8Array): Promise<void> {
-    if (!this.txCharacteristic) throw new Error('连接断开');
+    if (!this.txCharacteristic) throw new Error('Disconnected');
     const packet = P7Protocol.createPacket(msgId, payload);
     await this.txCharacteristic.writeValue(packet);
   }
@@ -117,7 +115,8 @@ export class BluetoothService {
   onData(callback: (data: Uint8Array) => void) { this.onDataCallback = callback; }
   disconnect() {
     if (this.device?.gatt.connected) this.device.gatt.disconnect();
-    this.txCharacteristic = null; this.rxCharacteristic = null;
+    this.txCharacteristic = null; 
+    this.rxCharacteristic = null;
     this.receiveBuffer = new Uint8Array(0);
   }
 }

@@ -18,10 +18,8 @@ export const calculateReflectance = (sample: number[], white: number[], dark: nu
   return sample.map((s, i) => {
     const whiteSignal = (white[i] || 0) - (dark[i] || 0);
     const sampleSignal = (s || 0) - (dark[i] || 0);
-    
     const denominator = whiteSignal <= 0 ? 1 : whiteSignal;
     const ratio = Math.max(0, sampleSignal) / denominator;
-    
     const coef = WHITEBOARD_COEFFICIENTS[i] || 1.0;
     return Math.max(0, Math.min(1.1, ratio * coef));
   });

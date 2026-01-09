@@ -1,9 +1,10 @@
 
 {
-  "name": "棉花叶片氮素监测系统",
+  "name": "棉花叶片氮素监测平台",
   "short_name": "棉氮监测",
-  "description": "基于光谱分析技术的棉花叶片氮营养状况精准监测工具。",
-  "start_url": ".",
+  "description": "集成多光谱感知技术与人工智能决策算法的棉花精准监测系统。",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#10b981",
