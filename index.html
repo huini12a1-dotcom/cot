@@ -21,13 +21,11 @@
             background-color: #f8fafc;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            /* 禁止下拉刷新干扰蓝牙操作 */
             overscroll-behavior-y: contain; 
         }
         .safe-bottom {
             padding-bottom: env(safe-area-inset-bottom);
         }
-        /* 隐藏滚动条但保留滚动功能 */
         ::-webkit-scrollbar {
             display: none;
         }
@@ -47,5 +45,7 @@
 </head>
 <body>
     <div id="root"></div>
+    <!-- 核心修复：添加入口脚本 -->
+    <script type="module" src="index.tsx"></script>
 </body>
 </html>

@@ -8,13 +8,13 @@ import {
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
-import { bluetoothService } from './services/bluetoothService';
-import { P7Protocol } from './services/p7Protocol';
-import { calculateReflectance, predictNitrogen, DEFAULT_CONFIG } from './services/nitrogenModel';
-import { analyzeSpectraLocally, DiagnosticResult } from './services/diagnosticEngine';
-import { aiService } from './services/aiService';
-import { MessageId, SpectralData, ConnectionStatus } from './types';
-import { WAVEBANDS } from './constants';
+import { bluetoothService } from './services/bluetoothService.ts';
+import { P7Protocol } from './services/p7Protocol.ts';
+import { calculateReflectance, predictNitrogen, DEFAULT_CONFIG } from './services/nitrogenModel.ts';
+import { analyzeSpectraLocally, DiagnosticResult } from './services/diagnosticEngine.ts';
+import { aiService } from './services/aiService.ts';
+import { MessageId, SpectralData, ConnectionStatus } from './types.ts';
+import { WAVEBANDS } from './constants.tsx';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'monitor' | 'history' | 'device'>('monitor');
@@ -56,7 +56,6 @@ const App: React.FC = () => {
   }, [darkData, whiteData, isMeasuring]);
 
   const processData = useCallback((payload: Uint8Array) => {
-    // 按照规范，前12字节是指令镜像，后面是数据
     const rawData = payload.slice(12);
     const spectrum: number[] = [];
     for (let i = 0; i < rawData.length; i += 2) {
@@ -142,14 +141,13 @@ const App: React.FC = () => {
     (window as any)._pendingType = type;
     bluetoothService.clearBuffer();
 
-    // 构造载荷：控制字节(4) + 填充字节(8)
     let payload = new Uint8Array(12).fill(0xFF);
     if (type === 'white') {
-      payload.set([0x01, 0x01, 0x01, 0x00], 0); // 开灯，定标
+      payload.set([0x01, 0x01, 0x01, 0x00], 0);
     } else if (type === 'dark') {
-      payload.set([0x00, 0x01, 0x02, 0x00], 0); // 关灯，样品(暗电流)
+      payload.set([0x00, 0x01, 0x02, 0x00], 0);
     } else {
-      payload.set([0x01, 0x01, 0x02, 0x00], 0); // 开灯，样品
+      payload.set([0x01, 0x01, 0x02, 0x00], 0);
     }
 
     try {
@@ -179,7 +177,6 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 text-slate-900 overflow-hidden">
-      {/* 状态头 */}
       <header className="bg-white px-6 pt-12 pb-5 border-b border-slate-100 shrink-0 shadow-sm">
         <div className="flex justify-between items-center">
           <div>
@@ -197,7 +194,6 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* 主屏 */}
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-28">
         {error && (
           <div className="p-4 bg-red-50 border border-red-100 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-bold animate-in fade-in zoom-in">
@@ -337,7 +333,7 @@ const App: React.FC = () => {
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
             <div className="flex justify-between items-center px-2">
               <h2 className="text-lg font-black text-slate-800">监测档案</h2>
-              <button onClick={() => {/* 导出逻辑 */}} className="text-[10px] text-emerald-600 font-black bg-emerald-50 px-5 py-2.5 rounded-2xl flex items-center gap-1 shadow-sm">
+              <button onClick={() => {}} className="text-[10px] text-emerald-600 font-black bg-emerald-50 px-5 py-2.5 rounded-2xl flex items-center gap-1 shadow-sm">
                 <Download size={14} /> 导出报表
               </button>
             </div>
@@ -364,7 +360,6 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* 底部导航 */}
       <nav className="fixed bottom-6 left-6 right-6 bg-white/95 backdrop-blur-xl border border-slate-100 shadow-2xl rounded-[2.5rem] flex justify-around items-center h-20 safe-bottom">
         {[
           { id: 'device', icon: Smartphone, label: '设备' },

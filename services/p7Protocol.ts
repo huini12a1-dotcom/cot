@@ -1,11 +1,8 @@
 
-import { P7_MAGIC, P7_FCS } from '../constants';
-import { MessageId } from '../types';
+import { P7_MAGIC, P7_FCS } from '../constants.tsx';
+import { MessageId } from '../types.ts';
 
 export class P7Protocol {
-  /**
-   * 按照协议要求：计算从起始到校验和之前的所有字节总和
-   */
   static calculateChecksum(data: Uint8Array, length: number): number {
     let sum = 0;
     for (let i = 0; i < length; i++) {
@@ -14,52 +11,37 @@ export class P7Protocol {
     return sum;
   }
 
-  /**
-   * 构建 P7 数据帧
-   * Magic(2) + Len(2) + Extern(2) + SysID(1) + CompID(1) + MsgID(1) + Payload(n) + Sum(1) + FCS(2)
-   */
   static createPacket(msgId: MessageId, payload: Uint8Array): Uint8Array {
     const payloadLen = payload.length;
     const packet = new Uint8Array(12 + payloadLen);
 
-    // 帧头
-    packet[0] = P7_MAGIC[0]; // 0x77
-    packet[1] = P7_MAGIC[1]; // 0xCC
+    packet[0] = P7_MAGIC[0];
+    packet[1] = P7_MAGIC[1];
     
-    // 载荷长度 (小端)
     packet[2] = payloadLen & 0xFF;
     packet[3] = (payloadLen >> 8) & 0xFF;
     
-    // 扩展位
     packet[4] = 0xFF; 
     packet[5] = 0xFF;
     
-    // 身份标识
-    packet[6] = 0x01; // SysID
-    packet[7] = 0xA0; // CompID
+    packet[6] = 0x01;
+    packet[7] = 0xA0;
     
-    // 消息类型
     packet[8] = msgId;
 
-    // 有效载荷
     for (let i = 0; i < payloadLen; i++) {
       packet[9 + i] = payload[i];
     }
 
-    // 计算校验和
     const checksumIndex = 9 + payloadLen;
     packet[checksumIndex] = this.calculateChecksum(packet, checksumIndex);
 
-    // 帧尾
     packet[checksumIndex + 1] = 0x00;
     packet[checksumIndex + 2] = 0x00;
 
     return packet;
   }
 
-  /**
-   * 解析 P7 数据帧
-   */
   static parsePacket(data: Uint8Array): { msgId: number; payload: Uint8Array } | null {
     if (data.length < 12) return null;
     if (data[0] !== 0x77 || data[1] !== 0xCC) return null;

@@ -1,6 +1,6 @@
 
-import { P7Protocol } from './p7Protocol';
-import { MessageId } from '../types';
+import { P7Protocol } from './p7Protocol.ts';
+import { MessageId } from '../types.ts';
 
 export class BluetoothService {
   private device: any = null;
@@ -10,7 +10,6 @@ export class BluetoothService {
   private onDataCallback: ((data: Uint8Array) => void) | null = null;
   private receiveBuffer: Uint8Array = new Uint8Array(0);
   
-  // 按照示例要求的密钥
   private readonly HANDSHAKE_KEY = "LJ73BHGSTF23GD65";
 
   private readonly SERVICE_UUIDS = [
@@ -46,7 +45,6 @@ export class BluetoothService {
 
       this.device.addEventListener('gattserverdisconnected', () => this.disconnect());
 
-      // 发起握手鉴权
       await this.performHandshake();
 
       return this.device.name || 'P7 Spectrometer';
