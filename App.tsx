@@ -70,6 +70,7 @@ const App: React.FC = () => {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [tempRemark, setTempRemark] = useState('');
 
+  // 这里的 process.env.API_KEY 会被 vite.config.ts 中的 define 替换为实际值
   const hasApiKey = !!process.env.API_KEY;
   const stateRef = useRef({ darkData, whiteData, isMeasuring });
 
@@ -416,12 +417,12 @@ const App: React.FC = () => {
                    </div>
                    
                    {!hasApiKey ? (
-                     <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl space-y-3">
-                        <div className="flex items-center gap-2 text-amber-700 font-black text-xs uppercase tracking-wider">
+                     <div className="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                        <div className="flex items-center gap-2 text-slate-600 font-black text-xs uppercase tracking-wider">
                           <Key size={14} /> 云端模型离线
                         </div>
-                        <p className="text-[11px] text-amber-600 font-bold leading-relaxed">
-                          当前处于本地模式。接入 Gemini 专家引擎可获得更精准的施肥配方建议。
+                        <p className="text-[11px] text-slate-500 font-bold leading-relaxed">
+                          当前处于本地模式。请在应用部署设置中配置环境变量 API_KEY 以启用 Gemini 专家引擎。
                         </p>
                      </div>
                    ) : (
