@@ -1,11 +1,16 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const aiService = {
+  getAI() {
+    // 动态获取 API_KEY，防止模块加载时 ReferenceError
+    const apiKey = typeof process !== 'undefined' ? process.env.API_KEY : '';
+    return new GoogleGenAI({ apiKey: apiKey || '' });
+  },
+
   async analyzeCottonHealth(nitrogen: number, status: string, stressors: string[]): Promise<string> {
     try {
+      const ai = this.getAI();
       const prompt = `你是一位中国棉花精准管理专家。请根据以下数据提供农事建议：
       - 监测氮含量：${nitrogen} mg/g
       - 本地诊断状态：${status}

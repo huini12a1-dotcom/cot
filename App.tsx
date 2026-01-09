@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Bluetooth, Activity, History as HistoryIcon, Trash2, Download,
   AlertCircle, CheckCircle2, Loader2, CircleDot, Database, 
-  Smartphone, Info, RefreshCw, MessageSquare, Cpu, Leaf, X
+  Smartphone, Info, RefreshCw, MessageSquare, Cpu, Leaf, X, Key
 } from 'lucide-react';
 import { 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
@@ -31,17 +31,23 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const [records, setRecords] = useState<SpectralData[]>(() => {
-    const s = localStorage.getItem('cotton_records_v1');
-    return s ? JSON.parse(s) : [];
+    try {
+      const s = localStorage.getItem('cotton_records_v1');
+      return s ? JSON.parse(s) : [];
+    } catch { return []; }
   });
   
   const [darkData, setDarkData] = useState<number[] | null>(() => {
-    const s = localStorage.getItem('spectral_dark');
-    return s ? JSON.parse(s) : null;
+    try {
+      const s = localStorage.getItem('spectral_dark');
+      return s ? JSON.parse(s) : null;
+    } catch { return null; }
   });
   const [whiteData, setWhiteData] = useState<number[] | null>(() => {
-    const s = localStorage.getItem('spectral_white');
-    return s ? JSON.parse(s) : null;
+    try {
+      const s = localStorage.getItem('spectral_white');
+      return s ? JSON.parse(s) : null;
+    } catch { return null; }
   });
   
   const [results, setResults] = useState<SpectralData | null>(null);
@@ -49,6 +55,9 @@ const App: React.FC = () => {
   const [aiReport, setAiReport] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [tempRemark, setTempRemark] = useState('');
+
+  // 检查是否配置了 API Key
+  const hasApiKey = !!process.env.API_KEY;
 
   const stateRef = useRef({ darkData, whiteData, isMeasuring });
   useEffect(() => {
@@ -291,10 +300,23 @@ const App: React.FC = () => {
                 <section className="bg-white p-7 rounded-[2rem] border border-slate-100 shadow-sm">
                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><Info size={14} className="text-emerald-600" /> 生理建议</h3>
                    <p className="text-sm font-bold text-slate-700 leading-relaxed mb-8">{diagnostic.advice}</p>
-                   <button onClick={async () => { setIsAiLoading(true); setAiReport(await aiService.analyzeCottonHealth(results.nitrogenContent, diagnostic.title, diagnostic.stressAnalysis)); setIsAiLoading(false); }} disabled={isAiLoading} className="w-full bg-emerald-600 text-white font-black py-4.5 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md">
-                     {isAiLoading ? <Loader2 className="animate-spin" size={16} /> : <Cpu size={16} />}
-                     AI 专家辅助决策
-                   </button>
+                   
+                   {!hasApiKey ? (
+                     <div className="p-5 bg-amber-50 border border-amber-200 rounded-2xl space-y-3">
+                        <div className="flex items-center gap-2 text-amber-700 font-black text-xs uppercase tracking-wider">
+                          <Key size={14} /> AI 功能未激活
+                        </div>
+                        <p className="text-[11px] text-amber-600 font-bold leading-relaxed">
+                          检测到您尚未在 Vercel 环境变量中配置 <b>API_KEY</b>。请前往 Vercel 项目设置添加环境变量后重新部署以使用 AI 专家功能。
+                        </p>
+                     </div>
+                   ) : (
+                     <button onClick={async () => { setIsAiLoading(true); setAiReport(await aiService.analyzeCottonHealth(results.nitrogenContent, diagnostic.title, diagnostic.stressAnalysis)); setIsAiLoading(false); }} disabled={isAiLoading} className="w-full bg-emerald-600 text-white font-black py-4.5 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md">
+                       {isAiLoading ? <Loader2 className="animate-spin" size={16} /> : <Cpu size={16} />}
+                       AI 专家辅助决策
+                     </button>
+                   )}
+                   
                    {aiReport && (
                      <div className="mt-5 p-6 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                         <p className="text-[13px] font-medium text-slate-800 leading-[1.8]">{aiReport}</p>
@@ -355,6 +377,12 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ))}
+              {records.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-300">
+                  <Database size={48} strokeWidth={1} />
+                  <p className="mt-4 font-black text-xs uppercase tracking-widest">暂无监测记录</p>
+                </div>
+              )}
             </div>
           </div>
         )}
