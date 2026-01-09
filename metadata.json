@@ -1,0 +1,8 @@
+{
+  "name": "棉花叶片氮素监测系统",
+  "short_name": "棉氮监测",
+  "description": "基于光谱分析技术的棉花叶片氮营养状况精准监测工具。",
+  "requestFramePermissions": [
+    "bluetooth"
+  ]
+}

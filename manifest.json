@@ -1,0 +1,18 @@
+
+{
+  "name": "棉花叶片氮素监测系统",
+  "short_name": "棉氮监测",
+  "description": "基于光谱分析技术的棉花叶片氮营养状况精准监测工具。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/888/888856.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
